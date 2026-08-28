@@ -80,7 +80,9 @@
     const prefixes=config.generic.prefixes.map(v=>v.toLowerCase());
     ;(opts.customRemove||[]).forEach(v=>exact.add(String(v).trim().toLowerCase()));
     const preserve=new Set((opts.preserve||[]).map(v=>String(v).trim().toLowerCase()));
-    if(matched){matched.exact.forEach(v=>exact.add(v.toLowerCase()));matched.prefixes.forEach(v=>prefixes.push(v.toLowerCase()))}
+    // Conservative removes only high-confidence generic trackers. Standard and
+    // Aggressive also apply platform-specific sharing/affiliate cleanup.
+    if(matched&&opts.preset!=='conservative'){matched.exact.forEach(v=>exact.add(v.toLowerCase()));matched.prefixes.forEach(v=>prefixes.push(v.toLowerCase()))}
     const removed=[];
     [...clone.searchParams.keys()].forEach(key=>{
       const lower=key.toLowerCase();

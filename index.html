@@ -25,15 +25,9 @@
     <section class="before-after" aria-label="LinkReady example">
       <p class="eyebrow">Instantly cleaner</p>
       <div class="example-grid">
-        <div class="example-box">
-          <span>Before</span>
-          <code>https://example.com/article?utm_source=newsletter&amp;utm_campaign=summer&amp;fbclid=abc123</code>
-        </div>
+        <div class="example-box"><span>Before</span><code>https://example.com/article?utm_source=newsletter&amp;utm_campaign=summer&amp;fbclid=abc123</code></div>
         <div class="example-arrow" aria-hidden="true">→</div>
-        <div class="example-box after">
-          <span>After</span>
-          <code>https://example.com/article</code>
-        </div>
+        <div class="example-box after"><span>After</span><code>https://example.com/article</code></div>
       </div>
     </section>
 
@@ -53,72 +47,57 @@
       <div class="summary-row">
         <div>
           <p class="eyebrow">Cleaned</p>
-          <p id="removedText" class="removed-text">Tracking removed</p>
+          <p id="removedText" class="removed-text">No tracking parameters found</p>
+          <p id="removedParams" class="removed-params"></p>
         </div>
         <button id="resetBtn" class="text-btn" type="button">Use another link</button>
       </div>
 
       <div id="destinationGrid" class="destination-grid">
         <article class="destination-card featured" data-card-format="clean">
-          <div class="destination-top">
-            <span class="destination-icon">✓</span>
-            <div><h2>Clean link</h2><p>Original domain, tracking removed.</p></div>
-          </div>
+          <div class="destination-top"><span class="destination-icon">✓</span><div><h2>Clean link</h2><p>Original domain, tracking removed.</p></div></div>
           <div id="cleanPreview" class="preview"></div>
+          <button id="amazonCanonicalBtn" class="canonical-btn" type="button" hidden>Use minimal Amazon link</button>
           <button class="copy-btn" data-format="clean" type="button">Copy clean link</button>
         </article>
 
         <article class="destination-card" data-card-format="whatsapp">
-          <div class="destination-top">
-            <span class="destination-icon">WA</span>
-            <div><h2>WhatsApp</h2><p>Simple, readable sharing.</p></div>
-          </div>
+          <div class="destination-top"><span class="destination-icon">WA</span><div><h2>WhatsApp</h2><p>Simple, readable sharing.</p></div></div>
           <div id="whatsappPreview" class="preview"></div>
-          <div class="platform-preview whatsapp-sim" aria-label="Simulated WhatsApp preview">
-            <span class="sim-label">Simulated preview</span>
-            <strong class="sim-title"></strong>
-            <small class="sim-domain"></small>
-          </div>
+          <div class="platform-preview whatsapp-sim" aria-label="Simulated WhatsApp preview"><span class="sim-label">Simulated preview</span><strong class="sim-title"></strong><small class="sim-domain"></small></div>
           <button class="copy-btn" data-format="whatsapp" type="button">Copy for WhatsApp</button>
         </article>
 
         <article class="destination-card" data-card-format="email">
-          <div class="destination-top">
-            <span class="destination-icon">@</span>
-            <div><h2>Email</h2><p>A tidy clickable-link format.</p></div>
-          </div>
+          <div class="destination-top"><span class="destination-icon">@</span><div><h2>Email</h2><p>A tidy clickable-link format.</p></div></div>
           <div id="emailPreview" class="preview"></div>
-          <div class="platform-preview email-sim" aria-label="Simulated email preview">
-            <span class="sim-label">Simulated preview</span>
-            <strong class="sim-title"></strong>
-            <small class="sim-domain"></small>
-          </div>
+          <div class="platform-preview email-sim" aria-label="Simulated email preview"><span class="sim-label">Simulated preview</span><strong class="sim-title"></strong><small class="sim-domain"></small></div>
           <button class="copy-btn" data-format="email" type="button">Copy for email</button>
         </article>
 
         <article class="destination-card" data-card-format="linkedin">
-          <div class="destination-top">
-            <span class="destination-icon">in</span>
-            <div><h2>LinkedIn</h2><p>Clean link without tracking noise.</p></div>
-          </div>
+          <div class="destination-top"><span class="destination-icon">in</span><div><h2>LinkedIn</h2><p>Clean link without tracking noise.</p></div></div>
           <div id="linkedinPreview" class="preview"></div>
-          <div class="platform-preview linkedin-sim" aria-label="Simulated LinkedIn preview">
-            <span class="sim-label">Simulated preview</span>
-            <strong class="sim-title"></strong>
-            <small class="sim-domain"></small>
-          </div>
+          <div class="platform-preview linkedin-sim" aria-label="Simulated LinkedIn preview"><span class="sim-label">Simulated preview</span><strong class="sim-title"></strong><small class="sim-domain"></small></div>
           <button class="copy-btn" data-format="linkedin" type="button">Copy for LinkedIn</button>
         </article>
 
         <article class="destination-card" data-card-format="markdown">
-          <div class="destination-top">
-            <span class="destination-icon">M↓</span>
-            <div><h2>Markdown</h2><p>Ready for docs, notes and GitHub.</p></div>
-          </div>
+          <div class="destination-top"><span class="destination-icon">M↓</span><div><h2>Markdown</h2><p>Ready for docs, notes and GitHub.</p></div></div>
           <div id="markdownPreview" class="preview"></div>
           <button class="copy-btn" data-format="markdown" type="button">Copy Markdown</button>
         </article>
       </div>
+    </section>
+
+    <section class="bookmarklet-section card" aria-labelledby="bookmarklet-title">
+      <div>
+        <p class="eyebrow">One-click browser tool</p>
+        <h2 id="bookmarklet-title">Clean links without opening LinkReady</h2>
+        <p>Drag this to your bookmarks bar. On any page, click it to copy the cleaned current URL.</p>
+      </div>
+      <a id="bookmarkletLink" class="bookmarklet-btn" href="#" draggable="true">Clean This Link</a>
+      <small>Fully client-side. Uses the same LinkReady cleaning rules as this page.</small>
     </section>
 
     <section class="how-it-works">
@@ -130,13 +109,11 @@
       </div>
     </section>
 
-    <footer>
-      <span>LinkReady</span>
-      <span>No account · No upload · No tracking · <a href="https://github.com/sweater9/LinkReady" target="_blank" rel="noreferrer">Source code</a></span>
-    </footer>
+    <footer><span>LinkReady</span><span>No account · No upload · No tracking · <a href="https://github.com/sweater9/LinkReady" target="_blank" rel="noreferrer">Source code</a></span></footer>
   </main>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="cleaner.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

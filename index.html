@@ -1,77 +1,18 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="description" content="Make any link ready for WhatsApp, email, LinkedIn, Markdown, or a clean share." />
-  <meta name="theme-color" content="#5b5bd6" />
-  <link rel="manifest" href="manifest.webmanifest" />
-  <link rel="icon" href="icon.svg" />
-  <title>LinkReady — One link. Ready for anywhere.</title>
-  <link rel="stylesheet" href="styles.css" />
-</head>
-<body>
-  <main class="shell">
-    <header class="hero">
-      <div class="brand" aria-label="LinkReady home"><span class="logo-mark">↗</span><span>LinkReady</span></div>
-      <div class="trust-row"><span class="privacy-pill">Private · runs in your browser</span><a class="source-link" href="https://github.com/sweater9/LinkReady" target="_blank" rel="noreferrer">View source ↗</a></div>
-      <h1>One link.<br><span>Ready for anywhere.</span></h1>
-      <p class="subhead">Paste a URL once. Copy a clean version made for where you’re sharing it.</p>
-    </header>
-
-    <section class="before-after" aria-label="LinkReady example">
-      <p class="eyebrow">Instantly cleaner</p>
-      <div class="example-grid">
-        <div class="example-box"><span>Before</span><code>https://example.com/article?utm_source=newsletter&amp;utm_campaign=summer&amp;fbclid=abc123</code></div>
-        <div class="example-arrow" aria-hidden="true">→</div>
-        <div class="example-box after"><span>After</span><code>https://example.com/article</code></div>
-      </div>
-    </section>
-
-    <section class="card input-card" aria-labelledby="link-label">
-      <div class="input-heading"><label id="link-label" for="urlInput">Paste a link</label><span id="cleanCount" class="local-counter">0 links cleaned on this device</span></div>
-      <div class="input-row"><input id="urlInput" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://example.com/article?utm_source=..." /><button id="pasteBtn" class="secondary-btn" type="button">Paste</button></div>
-      <div class="input-meta"><div id="status" class="status" role="status" aria-live="polite"></div><span class="shortcut-hint">Tip: paste anywhere · <kbd>⌘/Ctrl</kbd> + <kbd>Enter</kbd> copies your top format</span></div>
-    </section>
-
-    <section id="results" class="results hidden" aria-live="polite">
-      <div class="summary-row">
-        <div><p class="eyebrow">Cleaned</p><p id="removedText" class="removed-text">No tracking parameters found</p><p id="removedParams" class="removed-params"></p><p id="edgeNotice" class="edge-notice"></p></div>
-        <button id="resetBtn" class="text-btn" type="button">Use another link</button>
-      </div>
-      <details class="why-details"><summary>Why remove these parameters?</summary><p>Tracking parameters can tell sites or ad platforms where a click came from and sometimes connect that click to an advertising or campaign identifier. LinkReady removes common tracking-only values while keeping the destination itself intact.</p></details>
-
-      <div id="destinationGrid" class="destination-grid">
-        <article class="destination-card featured" data-card-format="clean">
-          <div class="destination-top"><span class="destination-icon">✓</span><div><h2>Clean link</h2><p>Original domain, tracking removed.</p></div></div>
-          <div id="cleanPreview" class="preview"></div><button id="amazonCanonicalBtn" class="canonical-btn" type="button" hidden>Use minimal Amazon link</button><button class="copy-btn" data-format="clean" type="button">Copy clean link</button>
-        </article>
-        <article class="destination-card" data-card-format="whatsapp"><div class="destination-top"><span class="destination-icon">WA</span><div><h2>WhatsApp</h2><p>Simple, readable sharing.</p></div></div><div id="whatsappPreview" class="preview"></div><div class="platform-preview whatsapp-sim"><span class="sim-label">Simulated preview</span><strong class="sim-title"></strong><small class="sim-domain"></small></div><button class="copy-btn" data-format="whatsapp" type="button">Copy for WhatsApp</button></article>
-        <article class="destination-card" data-card-format="email"><div class="destination-top"><span class="destination-icon">@</span><div><h2>Email</h2><p>A tidy clickable-link format.</p></div></div><div id="emailPreview" class="preview"></div><div class="platform-preview email-sim"><span class="sim-label">Simulated preview</span><strong class="sim-title"></strong><small class="sim-domain"></small></div><button class="copy-btn" data-format="email" type="button">Copy for email</button></article>
-        <article class="destination-card" data-card-format="linkedin"><div class="destination-top"><span class="destination-icon">in</span><div><h2>LinkedIn</h2><p>Clean link without tracking noise.</p></div></div><div id="linkedinPreview" class="preview"></div><div class="platform-preview linkedin-sim"><span class="sim-label">Simulated preview</span><strong class="sim-title"></strong><small class="sim-domain"></small></div><button class="copy-btn" data-format="linkedin" type="button">Copy for LinkedIn</button></article>
-        <article class="destination-card" data-card-format="markdown"><div class="destination-top"><span class="destination-icon">M↓</span><div><h2>Markdown</h2><p>Ready for docs, notes and GitHub.</p></div></div><div id="markdownPreview" class="preview"></div><button class="copy-btn" data-format="markdown" type="button">Copy Markdown</button></article>
-      </div>
-    </section>
-
-    <section id="historySection" class="history-section card hidden" aria-labelledby="historyTitle">
-      <div class="section-heading"><div><p class="eyebrow">Local history</p><h2 id="historyTitle">Recently cleaned</h2></div><button id="clearHistoryBtn" class="text-btn" type="button">Clear history</button></div>
-      <div id="historyList" class="history-list"></div><small>Stored only in this browser. Nothing is sent to LinkReady.</small>
-    </section>
-
-    <section class="mobile-section card">
-      <div><p class="eyebrow">Mobile</p><h2>Install LinkReady</h2><p>On supported Android/Chromium browsers, install LinkReady and it can appear as a share target. On iPhone/iPad, Safari can install the PWA, but iOS does not currently expose installed web apps as Web Share Targets.</p></div>
-      <button id="installBtn" class="secondary-action" type="button" hidden>Install LinkReady</button>
-    </section>
-
-    <section class="bookmarklet-section card" aria-labelledby="bookmarklet-title">
-      <div><p class="eyebrow">One-click browser tool</p><h2 id="bookmarklet-title">Clean links without opening LinkReady</h2><p>Drag this to your bookmarks bar. On any page, click it to copy the cleaned current URL.</p></div>
-      <a id="bookmarkletLink" class="bookmarklet-btn" href="#" draggable="true">Clean This Link</a><small>Fully client-side. Uses the same LinkReady cleaning rules as this page.</small>
-    </section>
-
-    <section class="how-it-works"><p class="eyebrow">How it works</p><div class="steps"><div><strong>1</strong><span>Paste</span><small>Your URL stays on your device.</small></div><div><strong>2</strong><span>Choose</span><small>Pick where you’re sharing it.</small></div><div><strong>3</strong><span>Copy</span><small>Paste it anywhere.</small></div></div></section>
-    <footer><span>LinkReady</span><span>No account · No upload · No tracking · <a href="https://github.com/sweater9/LinkReady" target="_blank" rel="noreferrer">Source code</a></span></footer>
-  </main>
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="cleaner.js"></script><script src="app.js"></script>
-</body>
-</html>
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Clean tracking from links and format them for anywhere — privately in your browser."><meta name="theme-color" content="#5b5bd6">
+<meta property="og:type" content="website"><meta property="og:url" content="https://sweater9.github.io/LinkReady/"><meta property="og:title" content="LinkReady — One link. Ready for anywhere."><meta property="og:description" content="Clean tracking from links — privately in your browser."><meta property="og:image" content="https://sweater9.github.io/LinkReady/og.png">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="LinkReady — One link. Ready for anywhere."><meta name="twitter:description" content="Clean tracking from links — privately in your browser."><meta name="twitter:image" content="https://sweater9.github.io/LinkReady/og.png">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg"><link rel="apple-touch-icon" href="apple-touch-icon.png"><title>LinkReady — One link. Ready for anywhere.</title><link rel="stylesheet" href="styles.css"></head><body>
+<a class="skip-link" href="#cleaner">Skip to cleaner</a><main class="shell">
+<header class="hero"><div class="brand" aria-label="LinkReady home"><span class="logo-mark">↗</span><span>LinkReady</span></div><div class="trust-row"><span class="privacy-pill">Private · runs in your browser</span><a class="source-link" href="https://github.com/sweater9/LinkReady" target="_blank" rel="noreferrer">View source ↗</a></div><h1>One link.<br><span>Ready for anywhere.</span></h1><p class="subhead">Clean tracking, understand every parameter, and share a polished link—all without uploading it.</p></header>
+<section class="before-after" aria-label="LinkReady example"><p class="eyebrow">Instantly cleaner</p><div class="example-grid"><div class="example-box"><span>Before</span><code>example.com/article?utm_source=newsletter&amp;fbclid=abc123</code></div><div class="example-arrow">→</div><div class="example-box after"><span>After</span><code>example.com/article</code></div></div></section>
+<section id="cleaner" class="card input-card" aria-labelledby="link-label"><div class="input-heading"><label id="link-label" for="urlInput">Paste a link</label><span id="cleanCount" class="local-counter">0 links cleaned on this device</span></div><div class="input-row"><input id="urlInput" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://example.com/article?utm_source=..."><button id="pasteBtn" class="secondary-btn" type="button">Paste</button></div><div class="quick-actions"><button id="clipboardBtn" class="text-btn" type="button">Use clipboard</button><button id="batchToggle" class="text-btn" type="button">Clean multiple links</button></div>
+<div id="batchPanel" class="batch-panel hidden"><label for="batchInput">One link per line</label><textarea id="batchInput" rows="6" placeholder="https://example.com/one?utm_source=...&#10;https://example.com/two?fbclid=..."></textarea><div class="button-row"><button id="batchCleanBtn" class="secondary-action" type="button">Clean all</button><button id="batchCopyBtn" class="text-btn" type="button" hidden>Copy all</button><button id="batchExportBtn" class="text-btn" type="button" hidden>Export CSV</button></div><div id="batchResults" class="batch-results"></div></div><div class="input-meta"><div id="status" class="status" role="status" aria-live="polite"></div><span class="shortcut-hint"><kbd>⌘/Ctrl</kbd> + <kbd>Enter</kbd> copies · <kbd>Esc</kbd> resets</span></div><p class="integrity-note">Known tracking-only parameters are removed. Timestamps, searches, filters, and other functional values stay intact.</p></section>
+<section id="results" class="results hidden" aria-live="polite"><div class="summary-row"><div><p class="eyebrow">Cleaned</p><p id="removedText" class="removed-text"></p><p id="removedParams" class="removed-params"></p></div><div class="button-row"><button id="undoBtn" class="text-btn" type="button">Restore original</button><button id="resetBtn" class="text-btn" type="button">Use another link</button></div></div><div id="safetyCard" class="safety-card"><div><span class="safety-dot"></span><strong id="safetyTitle">Destination checked locally</strong><p id="edgeNotice"></p></div><code id="destinationHost"></code></div>
+<details class="explain-card" open><summary>Explain this link</summary><div id="explainGrid" class="explain-grid"></div><div id="parameterList" class="parameter-list"></div></details><div class="label-row"><label for="customLabel">Optional link label</label><input id="customLabel" placeholder="Project documentation"></div><div id="destinationGrid" class="destination-grid"></div>
+<section class="qr-card card"><div><p class="eyebrow">Scan or share</p><h2>QR code</h2><p>Generated locally. Your link never leaves this device.</p></div><div id="qrCode" class="qr-code"></div><div class="button-row"><button id="downloadQrBtn" class="secondary-action" type="button">Download QR</button><button id="nativeShareBtn" class="text-btn" type="button">Share…</button></div></section></section>
+<section class="tools-section card"><div class="section-heading"><div><p class="eyebrow">Controls</p><h2>Cleaning preferences</h2></div><button id="settingsToggle" class="text-btn" type="button">Show settings</button></div><div id="settingsPanel" class="settings-panel hidden"><label>Cleaning preset<select id="presetSelect"><option value="conservative">Conservative</option><option value="standard" selected>Standard</option><option value="aggressive">Aggressive</option></select></label><label>Always remove<input id="customRemove" placeholder="ref_code, partner_id"></label><label>Always preserve<input id="customPreserve" placeholder="t, page, filter"></label><p class="settings-help">Comma-separated parameter names. Aggressive also removes common referral fields.</p><div class="button-row"><button id="saveSettingsBtn" class="secondary-action" type="button">Save settings</button><button id="exportSettingsBtn" class="text-btn" type="button">Export</button><label class="file-label">Import<input id="importSettingsInput" type="file" accept="application/json"></label><button id="resetSettingsBtn" class="text-btn danger" type="button">Reset</button></div></div></section>
+<section class="stats-grid" aria-label="Local statistics"><article><strong id="statCleaned">0</strong><span>links cleaned</span></article><article><strong id="statRemoved">0</strong><span>parameters removed</span></article><article><strong id="statChars">0</strong><span>characters saved</span></article></section>
+<section id="historySection" class="history-section card hidden"><div class="section-heading"><div><p class="eyebrow">Local history</p><h2>Recently cleaned</h2></div><button id="clearHistoryBtn" class="text-btn danger" type="button">Clear history</button></div><div id="historyList" class="history-list"></div><small>Stored only in this browser.</small></section>
+<section class="mobile-section card"><div><p class="eyebrow">Mobile</p><h2>Install and share natively</h2><p>Install LinkReady on supported browsers, or use the share button after cleaning.</p></div><button id="installBtn" class="secondary-action" type="button" hidden>Install LinkReady</button></section><section class="bookmarklet-section card"><div><p class="eyebrow">Desktop shortcut</p><h2>Clean the page you’re viewing</h2><p>Drag the button to your bookmarks bar. On mobile, use LinkReady’s installed share target instead.</p></div><a id="bookmarkletLink" class="bookmarklet-btn" href="#" draggable="true">Clean This Link</a><small>Chrome, Edge, Firefox, and Safari desktop. Browser-extension source is included in the project.</small></section>
+<section class="how-it-works"><p class="eyebrow">How it works</p><div class="steps"><div><strong>1</strong><span>Inspect</span><small>See the destination and every parameter.</small></div><div><strong>2</strong><span>Clean</span><small>Remove known tracking without breaking the link.</small></div><div><strong>3</strong><span>Share</span><small>Copy, format, download a QR code, or share.</small></div></div></section><footer><span>LinkReady</span><span>No account · No upload · No tracking · <a href="https://github.com/sweater9/LinkReady" target="_blank" rel="noreferrer">Source code</a></span></footer></main><div id="toast" class="toast" role="status" aria-live="polite"></div><script src="vendor/qrcode.min.js"></script><script src="cleaner.js"></script><script src="app.js"></script></body></html>

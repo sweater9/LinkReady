@@ -78,11 +78,14 @@
     const matched=config.platforms.find(rule=>rule.patterns.some(pattern=>host.includes(pattern)))||null;
     const exact=new Set(config.generic.exact.map(v=>v.toLowerCase()));
     const prefixes=config.generic.prefixes.map(v=>v.toLowerCase());
+    ;(opts.customRemove||[]).forEach(v=>exact.add(String(v).trim().toLowerCase()));
+    const preserve=new Set((opts.preserve||[]).map(v=>String(v).trim().toLowerCase()));
     if(matched){matched.exact.forEach(v=>exact.add(v.toLowerCase()));matched.prefixes.forEach(v=>prefixes.push(v.toLowerCase()))}
     const removed=[];
     [...clone.searchParams.keys()].forEach(key=>{
       const lower=key.toLowerCase();
-      if(exact.has(lower)||prefixes.some(prefix=>lower.startsWith(prefix))){clone.searchParams.delete(key);if(!removed.includes(key))removed.push(key)}
+      const aggressive=opts.preset==='aggressive'&&/^(?:ref|source|campaign|campaignid|aff|affiliate|tracking|trk)$/i.test(lower);
+      if(!preserve.has(lower)&&(exact.has(lower)||prefixes.some(prefix=>lower.startsWith(prefix))||aggressive)){clone.searchParams.delete(key);if(!removed.includes(key))removed.push(key)}
     });
     if(clone.hash&&/^#(?:utm_|ref(?:errer)?=|fbclid=|gclid=)/i.test(clone.hash)){removed.push('fragment tracking');clone.hash=''}
     let amazonCanonical=null;
@@ -96,6 +99,22 @@
 
   function clean(raw,options){return cleanCore(raw,CONFIG,options)}
 
+  function inspect(raw,options){
+    const parsed=normalize(raw);if(!parsed)return null;
+    const cleaned=clean(raw,options);if(!cleaned)return null;
+    const removed=new Set(cleaned.removed.map(v=>v.toLowerCase()));
+    const parameters=[...parsed.searchParams.keys()].map(name=>({name,value:parsed.searchParams.get(name),kind:removed.has(name.toLowerCase())?'tracking':'functional'}));
+    const host=parsed.hostname.toLowerCase();
+    const asciiLookalike=/xn--/.test(host);
+    const mixedAlphabet=/[a-z].*[\u0400-\u04ff]|[\u0400-\u04ff].*[a-z]/i.test(host);
+    const manyHyphens=(host.match(/-/g)||[]).length>=3;
+    const warnings=[];
+    if(asciiLookalike||mixedAlphabet)warnings.push('This domain may use look-alike characters. Check it carefully.');
+    if(manyHyphens)warnings.push('This domain contains an unusual number of hyphens.');
+    if(cleaned.isShortened)warnings.push('Short-link destination cannot be verified without contacting the shortener.');
+    return{destination:cleaned.url,original:parsed.toString(),host,protocol:parsed.protocol,parameters,fragment:parsed.hash||'',redirects:cleaned.redirectUnwrapped,warnings,cleaned};
+  }
+
   function bookmarklet(){
     const normalizer=normalize.toString();
     const decoder=decodeCandidate.toString();
@@ -106,5 +125,5 @@
     return'javascript:'+encodeURIComponent(code);
   }
 
-  global.LinkReadyCleaner={CONFIG,normalize,clean,bookmarklet};
+  global.LinkReadyCleaner={CONFIG,normalize,clean,inspect,bookmarklet};
 })(window);

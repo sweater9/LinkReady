@@ -4,7 +4,7 @@
 
 LinkReady turns a pasted URL into a clean, destination-ready version for sharing.
 
-## Website MVP
+## Website
 
 - Remove common tracking parameters locally in the browser
 - Copy clean URL
@@ -12,6 +12,15 @@ LinkReady turns a pasted URL into a clean, destination-ready version for sharing
 - Copy for Email
 - Copy for LinkedIn
 - Copy as Markdown
+- Batch cleaning with copy-all and CSV export
+- Explain each link, parameter, redirect wrapper, and fragment
+- Local look-alike-domain and short-link warnings
+- QR codes generated entirely on-device
+- Ten clean output formats plus native device sharing
+- Conservative, Standard, and Aggressive cleaning presets
+- Custom remove/preserve rules with settings import/export
+- Local-only history and usage statistics
+- PWA install and Web Share Target support
 - No account
 - No API
 - No backend

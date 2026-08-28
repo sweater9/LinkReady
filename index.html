@@ -29,17 +29,22 @@
     </section>
 
     <section class="card input-card" aria-labelledby="link-label">
-      <div class="input-heading"><label id="link-label" for="urlInput">Paste a link</label><span id="cleanCount" class="local-counter">0 links cleaned on this device</span></div>
-      <div class="input-row"><input id="urlInput" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://example.com/article?utm_source=..." /><button id="pasteBtn" class="secondary-btn" type="button">Paste</button></div>
+      <div class="input-heading"><label id="link-label" for="urlInput">Paste one or several links</label><span id="cleanCount" class="local-counter">0 links cleaned on this device</span></div>
+      <div class="input-row batch-input-row"><textarea id="urlInput" rows="4" inputmode="url" autocomplete="off" spellcheck="false" placeholder="Paste one link per line&#10;https://example.com/article?utm_source=...&#10;https://youtube.com/watch?v=123&amp;si=tracking"></textarea><button id="pasteBtn" class="secondary-btn" type="button">Paste</button></div>
       <div class="input-meta"><div id="status" class="status" role="status" aria-live="polite"></div><span class="shortcut-hint">Tip: paste anywhere · <kbd>⌘/Ctrl</kbd> + <kbd>Enter</kbd> copies your top format</span></div>
     </section>
 
     <section id="results" class="results hidden" aria-live="polite">
       <div class="summary-row">
         <div><p class="eyebrow">Cleaned</p><p id="removedText" class="removed-text">No tracking parameters found</p><p id="removedParams" class="removed-params"></p><p id="edgeNotice" class="edge-notice"></p></div>
-        <button id="resetBtn" class="text-btn" type="button">Use another link</button>
+        <div class="summary-actions"><button id="undoBtn" class="text-btn" type="button">Undo</button><button id="resetBtn" class="text-btn" type="button">Use another link</button></div>
       </div>
-      <details class="why-details"><summary>Why remove these parameters?</summary><p>Tracking parameters can tell sites or ad platforms where a click came from and sometimes connect that click to an advertising or campaign identifier. LinkReady removes common tracking-only values while keeping the destination itself intact.</p></details>
+      <details class="why-details"><summary>What changed and why?</summary><div id="removalExplanations"></div></details>
+
+      <section id="batchResults" class="batch-results hidden" aria-labelledby="batchTitle">
+        <div class="section-heading"><div><p class="eyebrow">Batch cleaned</p><h2 id="batchTitle">Cleaned links</h2></div><div class="batch-actions"><button id="copyAllBtn" class="secondary-btn" type="button">Copy all</button><button id="exportTextBtn" class="text-btn" type="button">Export text</button><button id="exportCsvBtn" class="text-btn" type="button">Export CSV</button></div></div>
+        <div id="batchList" class="batch-list"></div>
+      </section>
 
       <div id="destinationGrid" class="destination-grid">
         <article class="destination-card featured" data-card-format="clean">

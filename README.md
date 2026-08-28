@@ -4,6 +4,8 @@
 
 LinkReady turns a pasted URL into a clean, destination-ready version for sharing.
 
+The current release supports single-link and batch cleaning, Copy All, text/CSV export, undo, local history, and clear explanations of removed parameters.
+
 ## Website MVP
 
 - Remove common tracking parameters locally in the browser

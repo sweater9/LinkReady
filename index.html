@@ -14,10 +14,28 @@
         <span class="logo-mark">↗</span>
         <span>LinkReady</span>
       </div>
-      <div class="privacy-pill">Private · runs in your browser</div>
+      <div class="trust-row">
+        <span class="privacy-pill">Private · runs in your browser</span>
+        <a class="source-link" href="https://github.com/sweater9/LinkReady" target="_blank" rel="noreferrer">View source ↗</a>
+      </div>
       <h1>One link.<br><span>Ready for anywhere.</span></h1>
       <p class="subhead">Paste a URL once. Copy a clean version made for where you’re sharing it.</p>
     </header>
+
+    <section class="before-after" aria-label="LinkReady example">
+      <p class="eyebrow">Instantly cleaner</p>
+      <div class="example-grid">
+        <div class="example-box">
+          <span>Before</span>
+          <code>https://example.com/article?utm_source=newsletter&amp;utm_campaign=summer&amp;fbclid=abc123</code>
+        </div>
+        <div class="example-arrow" aria-hidden="true">→</div>
+        <div class="example-box after">
+          <span>After</span>
+          <code>https://example.com/article</code>
+        </div>
+      </div>
+    </section>
 
     <section class="card input-card" aria-labelledby="link-label">
       <label id="link-label" for="urlInput">Paste a link</label>
@@ -25,7 +43,10 @@
         <input id="urlInput" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://example.com/article?utm_source=..." />
         <button id="pasteBtn" class="secondary-btn" type="button">Paste</button>
       </div>
-      <div id="status" class="status" role="status" aria-live="polite"></div>
+      <div class="input-meta">
+        <div id="status" class="status" role="status" aria-live="polite"></div>
+        <span class="shortcut-hint">Tip: paste anywhere · <kbd>⌘/Ctrl</kbd> + <kbd>Enter</kbd> copies your top format</span>
+      </div>
     </section>
 
     <section id="results" class="results hidden" aria-live="polite">
@@ -37,8 +58,8 @@
         <button id="resetBtn" class="text-btn" type="button">Use another link</button>
       </div>
 
-      <div class="destination-grid">
-        <article class="destination-card featured">
+      <div id="destinationGrid" class="destination-grid">
+        <article class="destination-card featured" data-card-format="clean">
           <div class="destination-top">
             <span class="destination-icon">✓</span>
             <div><h2>Clean link</h2><p>Original domain, tracking removed.</p></div>
@@ -47,34 +68,49 @@
           <button class="copy-btn" data-format="clean" type="button">Copy clean link</button>
         </article>
 
-        <article class="destination-card">
+        <article class="destination-card" data-card-format="whatsapp">
           <div class="destination-top">
             <span class="destination-icon">WA</span>
             <div><h2>WhatsApp</h2><p>Simple, readable sharing.</p></div>
           </div>
           <div id="whatsappPreview" class="preview"></div>
+          <div class="platform-preview whatsapp-sim" aria-label="Simulated WhatsApp preview">
+            <span class="sim-label">Simulated preview</span>
+            <strong class="sim-title"></strong>
+            <small class="sim-domain"></small>
+          </div>
           <button class="copy-btn" data-format="whatsapp" type="button">Copy for WhatsApp</button>
         </article>
 
-        <article class="destination-card">
+        <article class="destination-card" data-card-format="email">
           <div class="destination-top">
             <span class="destination-icon">@</span>
             <div><h2>Email</h2><p>A tidy clickable-link format.</p></div>
           </div>
           <div id="emailPreview" class="preview"></div>
+          <div class="platform-preview email-sim" aria-label="Simulated email preview">
+            <span class="sim-label">Simulated preview</span>
+            <strong class="sim-title"></strong>
+            <small class="sim-domain"></small>
+          </div>
           <button class="copy-btn" data-format="email" type="button">Copy for email</button>
         </article>
 
-        <article class="destination-card">
+        <article class="destination-card" data-card-format="linkedin">
           <div class="destination-top">
             <span class="destination-icon">in</span>
             <div><h2>LinkedIn</h2><p>Clean link without tracking noise.</p></div>
           </div>
           <div id="linkedinPreview" class="preview"></div>
+          <div class="platform-preview linkedin-sim" aria-label="Simulated LinkedIn preview">
+            <span class="sim-label">Simulated preview</span>
+            <strong class="sim-title"></strong>
+            <small class="sim-domain"></small>
+          </div>
           <button class="copy-btn" data-format="linkedin" type="button">Copy for LinkedIn</button>
         </article>
 
-        <article class="destination-card">
+        <article class="destination-card" data-card-format="markdown">
           <div class="destination-top">
             <span class="destination-icon">M↓</span>
             <div><h2>Markdown</h2><p>Ready for docs, notes and GitHub.</p></div>
@@ -96,7 +132,7 @@
 
     <footer>
       <span>LinkReady</span>
-      <span>No account · No upload · No tracking</span>
+      <span>No account · No upload · No tracking · <a href="https://github.com/sweater9/LinkReady" target="_blank" rel="noreferrer">Source code</a></span>
     </footer>
   </main>
 

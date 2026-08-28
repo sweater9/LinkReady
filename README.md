@@ -2,9 +2,9 @@
 
 **One link. Ready for anywhere.**
 
-LinkReady is a privacy-first one-page tool that turns a pasted URL into clean, destination-ready versions for sharing.
+LinkReady turns a pasted URL into a clean, destination-ready version for sharing.
 
-## V1
+## Website MVP
 
 - Remove common tracking parameters locally in the browser
 - Copy clean URL
@@ -17,14 +17,31 @@ LinkReady is a privacy-first one-page tool that turns a pasted URL into clean, d
 - No backend
 - No uploaded data
 
-## Product direction
+Open `index.html` locally, or deploy the repository with GitHub Pages.
 
-The website is the discovery and trial surface. The higher-frequency product is planned as a browser extension with a right-click **Copy for…** menu.
+## Chrome extension prototype
 
-## Run locally
+The website is the discovery/trial layer. The higher-frequency product is the browser extension in `/extension`.
 
-Open `index.html` in a browser.
+Current extension actions:
+
+- toolbar click → copy clean link
+- right-click → Copy clean link
+- right-click → Copy for WhatsApp
+- right-click → Copy for Email
+- right-click → Copy for LinkedIn
+- right-click → Copy as Markdown
+
+To test locally in Chrome:
+
+1. Open `chrome://extensions`.
+2. Enable **Developer mode**.
+3. Choose **Load unpacked**.
+4. Select the repository's `extension` folder.
+5. Visit a normal web page and use the LinkReady toolbar button or right-click menu.
 
 ## Privacy
 
-V1 processes URLs entirely client-side. Nothing is sent to a server by LinkReady.
+V1 processes URLs entirely client-side. LinkReady does not upload links to a server.
+
+The cleaner deliberately removes only known/common tracking identifiers. It avoids stripping generic query parameters that may be required for the destination page to work.

@@ -13,13 +13,15 @@ LinkReady turns a pasted URL into a clean, destination-ready version for sharing
 - Copy for LinkedIn
 - Copy as Markdown
 - Batch cleaning with copy-all and CSV export
-- Explain each link, parameter, redirect wrapper, and fragment
-- Local look-alike-domain and short-link warnings
+- Plain-language explanations for trackers, referral codes, and possible personal identifiers
+- Destination transparency from URL text alone: redirect-domain mismatches, brand lookalikes, and long encoded payloads
+- No destination is opened during inspection
 - QR codes generated entirely on-device
 - Ten clean output formats plus native device sharing
 - Conservative, Standard, and Aggressive cleaning presets
 - Custom remove/preserve rules with settings import/export
 - Local-only history and usage statistics
+- Offline-first PWA: after the first visit, the complete tool works with Wi-Fi off
 - PWA install and Web Share Target support
 - No account
 - No API
@@ -51,6 +53,6 @@ To test locally in Chrome:
 
 ## Privacy
 
-V1 processes URLs entirely client-side. LinkReady does not upload links to a server.
+LinkReady processes URLs entirely client-side. It does not upload links to a server or contact their destinations. Once its offline cache is ready, all core functionality runs without a network connection.
 
 The cleaner deliberately removes only known/common tracking identifiers. It avoids stripping generic query parameters that may be required for the destination page to work.

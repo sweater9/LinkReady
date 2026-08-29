@@ -51,6 +51,9 @@
   const REFERRAL_KEYS=new Set(['aff','affiliate','affiliate_id','affiliateid','ascsubtag','invite','invite_code','partner','partner_id','promo','promo_code','ref','ref_code','referral','referral_code','subid','sub_id','tag']);
   const PERSONAL_KEYS=new Set(['account','account_id','customer','customer_id','email','member','member_id','phone','recipient','recipient_id','subscriber','subscriber_id','uid','user','user_id','userid']);
   const CLICK_ID_KEYS=new Set(['clickid','click_id','dclid','fbclid','gclid','msclkid','ttclid','twclid','yclid']);
+  const REDIRECT_KEYS=new Set(['continue','dest','destination','href','link','next','out','redirect','redirect_uri','redirect_url','return','return_url','target','to','u','url']);
+  const BRANDS=['adobe','amazon','apple','discord','dropbox','facebook','github','google','instagram','linkedin','microsoft','netflix','paypal','stripe','tiktok','whatsapp','youtube'];
+  const COUNTRY_SUFFIXES=new Set(['co.uk','com.au','co.jp','co.in','co.nz','com.br','com.cn','com.hk','com.mx','com.my','com.ph','com.sg','com.tr','com.tw','co.za']);
 
   function genericExplanation(name,kind,host){
     const lower=name.toLowerCase();
@@ -86,6 +89,66 @@
     return findings;
   }
 
+  function editDistance(a,b){
+    const row=Array.from({length:b.length+1},(_,i)=>i);
+    for(let i=1;i<=a.length;i++){
+      let previous=row[0];row[0]=i;
+      for(let j=1;j<=b.length;j++){
+        const saved=row[j];
+        row[j]=Math.min(row[j]+1,row[j-1]+1,previous+(a[i-1]===b[j-1]?0:1));
+        previous=saved;
+      }
+    }
+    return row[b.length];
+  }
+
+  function rootLabel(host){
+    const parts=host.toLowerCase().replace(/\.$/,'').split('.');
+    if(parts.length<2)return parts[0]||'';
+    const suffix=parts.slice(-2).join('.');
+    return parts[COUNTRY_SUFFIXES.has(suffix)?parts.length-3:parts.length-2]||parts[0];
+  }
+
+  function lookalikeBrand(host){
+    if(host.includes('xn--'))return{brand:null,reason:'The domain uses internationalized characters encoded as Punycode, which can sometimes resemble another name.'};
+    const root=rootLabel(host),folded=root.replace(/0/g,'o').replace(/[1|]/g,'l').replace(/rn/g,'m').replace(/vv/g,'w');
+    for(const brand of BRANDS){
+      if(root===brand)continue;
+      if(folded===brand||editDistance(root,brand)===1||root.startsWith(brand+'-')||root.endsWith('-'+brand))return{brand,reason:`The registered-looking part “${root}” is visually close to “${brand}” but is not an exact match.`};
+      const labels=host.split('.');
+      if(labels.slice(0,-2).includes(brand))return{brand,reason:`“${brand}” appears only in a subdomain; the main domain is “${root}”.`};
+    }
+    return null;
+  }
+
+  function looksEncoded(value){
+    const raw=String(value||'');
+    if(raw.length<100)return false;
+    const percent=(raw.match(/%[0-9a-f]{2}/ig)||[]).length;
+    const compact=raw.replace(/\s/g,'');
+    const base64ish=/^[A-Za-z0-9+/_=-]+$/.test(compact)&&compact.length>=120;
+    return percent>=8||base64ish;
+  }
+
+  function transparencyCheck(url){
+    const findings=[],host=url.hostname.toLowerCase(),lookalike=lookalikeBrand(host);
+    if(lookalike)findings.push({kind:'lookalike',severity:'warning',title:'Possible look-alike domain',message:`${lookalike.reason} Check the spelling before opening or sharing it.`});
+    let embedded=null;
+    for(const [name,value] of url.searchParams){
+      if(!REDIRECT_KEYS.has(name.toLowerCase()))continue;
+      const decoded=decodeCandidate(value);
+      if(!decoded)continue;
+      const target=normalize(decoded);
+      if(target&&target.hostname.toLowerCase()!==host){embedded={name,host:target.hostname.toLowerCase()};break}
+    }
+    if(embedded)findings.push({kind:'redirect',severity:'caution',title:'Different destination inside the URL',message:`The visible link starts on ${host}, but its “${embedded.name}” field contains a destination on ${embedded.host}. This was decoded from the text only; LinkReady did not open either site.`});
+    const encodedParams=[...url.searchParams].filter(([,value])=>looksEncoded(value)).map(([name])=>name);
+    const encodedPath=url.pathname.split('/').filter(looksEncoded).length>0;
+    if(encodedParams.length||encodedPath)findings.push({kind:'encoded',severity:'caution',title:'Long encoded content',message:`This URL contains an unusually long encoded ${encodedParams.length?`value in ${encodedParams.join(', ')}`:'path segment'}. It may hide a destination, token, or payload that cannot be fully understood from the visible text.`});
+    if(url.toString().length>2000)findings.push({kind:'length',severity:'caution',title:'Extremely long URL',message:'This address is over 2,000 characters long. Very long links can conceal parameters or encoded content and deserve extra checking.'});
+    return findings;
+  }
+
   function normalize(raw){
     let value=String(raw||'').trim();
     if(!value)return null;
@@ -98,8 +161,7 @@
     const attempts=[value];
     try{attempts.push(decodeURIComponent(value))}catch{}
     for(const candidate of attempts){
-      const direct=normalize(candidate);
-      if(direct&&/^https?:$/i.test(direct.protocol))return direct.toString();
+      if(/^https?:\/\//i.test(String(candidate))){const direct=normalize(candidate);if(direct)return direct.toString()}
       const compact=String(candidate).replace(/\s/g,'').replace(/-/g,'+').replace(/_/g,'/');
       if(compact.length>=12&&/^[A-Za-z0-9+/]+=*$/.test(compact)){
         try{
@@ -176,7 +238,7 @@
       const value=parsed.searchParams.get(name),kind=removed.has(name.toLowerCase())?'tracking':'functional';
       return{name,value,kind,explanation:PARAMETER_EXPLANATIONS[name.toLowerCase()]||genericExplanation(name,kind,parsed.hostname.toLowerCase()),identifier:identifierFor(name,value)};
     });
-    const host=parsed.hostname.toLowerCase();
+    const host=parsed.hostname.toLowerCase(),destinationHost=normalize(cleaned.url)?.hostname.toLowerCase()||host;
     const asciiLookalike=/xn--/.test(host);
     const mixedAlphabet=/[a-z].*[\u0400-\u04ff]|[\u0400-\u04ff].*[a-z]/i.test(host);
     const manyHyphens=(host.match(/-/g)||[]).length>=3;
@@ -185,7 +247,9 @@
     if(manyHyphens)warnings.push('This domain contains an unusual number of hyphens.');
     if(cleaned.isShortened)warnings.push('Short-link destination cannot be verified without contacting the shortener.');
     const identifierFindings=[...parameters.filter(p=>p.identifier).map(p=>({source:'parameter',name:p.name,...p.identifier})),...pathFindings(parsed)];
-    return{destination:cleaned.url,original:parsed.toString(),host,protocol:parsed.protocol,parameters,identifierFindings,fragment:parsed.hash||'',redirects:cleaned.redirectUnwrapped,warnings,cleaned};
+    const transparency=transparencyCheck(parsed);
+    transparency.filter(item=>item.severity==='warning').forEach(item=>warnings.push(item.message));
+    return{destination:cleaned.url,original:parsed.toString(),host,destinationHost,protocol:parsed.protocol,parameters,identifierFindings,transparency,fragment:parsed.hash||'',redirects:cleaned.redirectUnwrapped,warnings,cleaned};
   }
 
   function bookmarklet(){

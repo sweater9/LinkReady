@@ -23,5 +23,22 @@ assert.equal(pathReferral.identifierFindings.some(f=>f.source==='path'&&f.kind==
 const ordinary=LinkReadyCleaner.inspect('https://example.com/article/long-but-normal-slug?page=2&filter=new',standard);
 assert.equal(ordinary.identifierFindings.length,0);
 assert.equal(ordinary.parameters.every(p=>p.kind==='functional'),true);
+assert.equal(ordinary.transparency.length,0);
+
+const lookalike=LinkReadyCleaner.inspect('https://arnazon.com/account?utm_source=email',standard);
+assert.equal(lookalike.transparency.some(f=>f.kind==='lookalike'&&f.severity==='warning'),true);
+
+const official=LinkReadyCleaner.inspect('https://www.amazon.ae/dp/B012345678',standard);
+assert.equal(official.transparency.some(f=>f.kind==='lookalike'),false);
+
+const wrapped=LinkReadyCleaner.inspect('https://redirect.example/go?target=https%3A%2F%2Fexample.com%2Fsafe',standard);
+assert.equal(wrapped.transparency.some(f=>f.kind==='redirect'&&/redirect\.example/.test(f.message)&&/example\.com/.test(f.message)),true);
+
+const encoded=LinkReadyCleaner.inspect(`https://example.com/open?payload=${'A'.repeat(140)}`,standard);
+assert.equal(encoded.transparency.some(f=>f.kind==='encoded'),true);
+
+const base64Target=Buffer.from('https://example.com/final').toString('base64url');
+const base64Wrapped=LinkReadyCleaner.inspect(`https://redirect.example/go?target=${base64Target}`,standard);
+assert.equal(base64Wrapped.transparency.some(f=>f.kind==='redirect'),true);
 
 console.log('cleaner tests passed');

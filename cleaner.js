@@ -19,6 +19,73 @@
     shorteners:['bit.ly','t.co','tinyurl.com','goo.gl','ow.ly','buff.ly','is.gd','cutt.ly','rb.gy','shorturl.at']
   };
 
+  const PARAMETER_EXPLANATIONS={
+    fbclid:'Facebook adds this unique click ID when a link is opened from Facebook. It can help connect the visit back to the Facebook click or ad interaction, especially when the destination uses Meta measurement tools.',
+    gclid:'Google Ads adds this unique click ID so an advertiser can connect the visit and later actions with a particular ad click.',
+    dclid:'Google Campaign Manager adds this click ID to measure which display ad led to the visit.',
+    msclkid:'Microsoft Advertising adds this unique click ID so the destination can attribute activity to a Bing or Microsoft ad click.',
+    ttclid:'TikTok adds this unique click ID to measure activity that follows a TikTok ad click.',
+    twclid:'X adds this unique click ID to measure activity that follows an ad click on X.',
+    yclid:'Yandex adds this unique click ID to attribute the visit to an advertisement.',
+    igshid:'Instagram adds this sharing identifier to some links. It can reveal that the link came through Instagram and help associate the visit with that sharing flow.',
+    igsh:'Instagram adds this sharing identifier to some copied links. The destination normally works without it.',
+    si:'YouTube adds this sharing token to some copied links. It identifies the share instance rather than the video itself, so the video normally works without it.',
+    feature:'YouTube uses this to record which product feature or sharing surface produced the link. It is not needed to identify the video.',
+    pp:'YouTube uses this encoded value for playback or promotional context. Shared videos usually work without it.',
+    mc_cid:'Mailchimp adds this campaign ID so visits can be attributed to a particular email campaign.',
+    mc_eid:'Mailchimp adds this recipient-related identifier to email links. It may let the sender connect the visit with a subscriber record.',
+    mkt_tok:'Marketing platforms add this token to connect a visit with a campaign or recipient record.',
+    tag:'Amazon uses this as an affiliate or associate tag. Keeping it may credit the person or publisher who shared the link.',
+    ascsubtag:'Amazon affiliates use this extra tag for more detailed referral attribution. It may identify the campaign or sharing partner.',
+    linkcode:'Amazon uses this to describe how an affiliate link was created. It is normally unnecessary for opening the product page.',
+    ref:'This commonly records the referring source, campaign, or person. On some sites it is functional, so LinkReady only removes it under applicable rules or an aggressive preset.',
+    affiliate:'This commonly identifies an affiliate relationship so a purchase or signup can be credited to a partner.',
+    affiliate_id:'This commonly identifies the affiliate or partner who should receive referral credit.',
+    referral_code:'This referral code may credit the person or campaign that shared the link.',
+    ref_code:'This referral code may credit the person or campaign that shared the link.',
+    partner_id:'This commonly identifies a commercial or referral partner for attribution.',
+    subid:'Affiliates use this secondary ID to identify a campaign, placement, or individual sharing source.',
+    sub_id:'Affiliates use this secondary ID to identify a campaign, placement, or individual sharing source.'
+  };
+
+  const REFERRAL_KEYS=new Set(['aff','affiliate','affiliate_id','affiliateid','ascsubtag','invite','invite_code','partner','partner_id','promo','promo_code','ref','ref_code','referral','referral_code','subid','sub_id','tag']);
+  const PERSONAL_KEYS=new Set(['account','account_id','customer','customer_id','email','member','member_id','phone','recipient','recipient_id','subscriber','subscriber_id','uid','user','user_id','userid']);
+  const CLICK_ID_KEYS=new Set(['clickid','click_id','dclid','fbclid','gclid','msclkid','ttclid','twclid','yclid']);
+
+  function genericExplanation(name,kind,host){
+    const lower=name.toLowerCase();
+    if(lower.startsWith('utm_')){
+      const labels={utm_source:'where the visitor came from',utm_medium:'the marketing channel',utm_campaign:'the campaign name',utm_content:'which link or creative was used',utm_term:'the paid-search keyword'};
+      return `Marketers use this field to record ${labels[lower]||'campaign attribution'}. It is useful for analytics but is not normally required to open the page on ${host}.`;
+    }
+    if(lower.startsWith('pd_rd_')||lower.startsWith('pf_rd_'))return 'Amazon uses this value for recommendation, placement, or advertising attribution. It is not normally needed to open the product page.';
+    if(kind==='tracking')return `This matches a known tracking field. It helps measure how the visit reached ${host}, but is not normally required for the page itself.`;
+    return `LinkReady kept this value because it may control content or behaviour on ${host}. Remove it only if you know the page works without it.`;
+  }
+
+  function identifierFor(name,value){
+    const lower=name.toLowerCase();
+    if(REFERRAL_KEYS.has(lower))return{kind:'referral',label:'referral / affiliate',message:'This looks like a referral or affiliate code. Sharing it may credit a person, publisher, or campaign.'};
+    if(PERSONAL_KEYS.has(lower))return{kind:'personal',label:'possible personal ID',message:'This field name suggests it may identify a person, customer, subscriber, or account. Check it before sharing.'};
+    if(CLICK_ID_KEYS.has(lower))return{kind:'click-id',label:'unique click ID',message:'This looks unique to one click. It may let services connect activity across systems, although it does not necessarily reveal your name by itself.'};
+    const decoded=String(value||'');
+    if(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(decoded))return{kind:'personal',label:'possible personal ID',message:'The value looks like an email address and may directly identify someone. Check it before sharing.'};
+    if(/(?:id|token|user|account|member|recipient|subscriber|click|track|ref|aff)/i.test(lower)&&decoded.length>=20&&/^[A-Za-z0-9._~-]+$/.test(decoded))return{kind:'personal',label:'possible personal token',message:'This long token may identify a person, account, session, or individual click. LinkReady cannot confirm its purpose locally.'};
+    return null;
+  }
+
+  function pathFindings(url){
+    const parts=url.pathname.split('/').filter(Boolean);
+    const findings=[];
+    for(let i=0;i<parts.length-1;i++){
+      if(/^(?:aff|affiliate|invite|invitation|r|ref|referral|u|user)$/i.test(parts[i])&&parts[i+1].length>=4){
+        findings.push({source:'path',name:`/${parts[i]}/…`,kind:/^(?:aff|affiliate|invite|invitation|r|ref|referral)$/i.test(parts[i])?'referral':'personal',label:/^(?:aff|affiliate|invite|invitation|r|ref|referral)$/i.test(parts[i])?'referral path':'possible personal path',message:/^(?:aff|affiliate|invite|invitation|r|ref|referral)$/i.test(parts[i])?'The address path appears to contain an invite or referral code. Sharing it may credit the person or campaign that created it.':'The address path appears to contain a user-related identifier. Check it before sharing.'});
+        break;
+      }
+    }
+    return findings;
+  }
+
   function normalize(raw){
     let value=String(raw||'').trim();
     if(!value)return null;
@@ -105,7 +172,10 @@
     const parsed=normalize(raw);if(!parsed)return null;
     const cleaned=clean(raw,options);if(!cleaned)return null;
     const removed=new Set(cleaned.removed.map(v=>v.toLowerCase()));
-    const parameters=[...parsed.searchParams.keys()].map(name=>({name,value:parsed.searchParams.get(name),kind:removed.has(name.toLowerCase())?'tracking':'functional'}));
+    const parameters=[...new Set(parsed.searchParams.keys())].map(name=>{
+      const value=parsed.searchParams.get(name),kind=removed.has(name.toLowerCase())?'tracking':'functional';
+      return{name,value,kind,explanation:PARAMETER_EXPLANATIONS[name.toLowerCase()]||genericExplanation(name,kind,parsed.hostname.toLowerCase()),identifier:identifierFor(name,value)};
+    });
     const host=parsed.hostname.toLowerCase();
     const asciiLookalike=/xn--/.test(host);
     const mixedAlphabet=/[a-z].*[\u0400-\u04ff]|[\u0400-\u04ff].*[a-z]/i.test(host);
@@ -114,7 +184,8 @@
     if(asciiLookalike||mixedAlphabet)warnings.push('This domain may use look-alike characters. Check it carefully.');
     if(manyHyphens)warnings.push('This domain contains an unusual number of hyphens.');
     if(cleaned.isShortened)warnings.push('Short-link destination cannot be verified without contacting the shortener.');
-    return{destination:cleaned.url,original:parsed.toString(),host,protocol:parsed.protocol,parameters,fragment:parsed.hash||'',redirects:cleaned.redirectUnwrapped,warnings,cleaned};
+    const identifierFindings=[...parameters.filter(p=>p.identifier).map(p=>({source:'parameter',name:p.name,...p.identifier})),...pathFindings(parsed)];
+    return{destination:cleaned.url,original:parsed.toString(),host,protocol:parsed.protocol,parameters,identifierFindings,fragment:parsed.hash||'',redirects:cleaned.redirectUnwrapped,warnings,cleaned};
   }
 
   function bookmarklet(){

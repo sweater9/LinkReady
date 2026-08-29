@@ -141,7 +141,7 @@
       const target=normalize(decoded);
       if(target&&target.hostname.toLowerCase()!==host){embedded={name,host:target.hostname.toLowerCase()};break}
     }
-    if(embedded)findings.push({kind:'redirect',severity:'caution',title:'Different destination inside the URL',message:`The visible link starts on ${host}, but its “${embedded.name}” field contains a destination on ${embedded.host}. This was decoded from the text only; LinkReady did not open either site.`});
+    if(embedded)findings.push({kind:'redirect',severity:'caution',title:'Different destination inside the URL',targetHost:embedded.host,message:`The visible link starts on ${host}, but its “${embedded.name}” field contains a destination on ${embedded.host}. This was decoded from the text only; LinkReady did not open either site.`});
     const encodedParams=[...url.searchParams].filter(([,value])=>looksEncoded(value)).map(([name])=>name);
     const encodedPath=url.pathname.split('/').filter(looksEncoded).length>0;
     if(encodedParams.length||encodedPath)findings.push({kind:'encoded',severity:'caution',title:'Long encoded content',message:`This URL contains an unusually long encoded ${encodedParams.length?`value in ${encodedParams.join(', ')}`:'path segment'}. It may hide a destination, token, or payload that cannot be fully understood from the visible text.`});
@@ -238,7 +238,7 @@
       const value=parsed.searchParams.get(name),kind=removed.has(name.toLowerCase())?'tracking':'functional';
       return{name,value,kind,explanation:PARAMETER_EXPLANATIONS[name.toLowerCase()]||genericExplanation(name,kind,parsed.hostname.toLowerCase()),identifier:identifierFor(name,value)};
     });
-    const host=parsed.hostname.toLowerCase(),destinationHost=normalize(cleaned.url)?.hostname.toLowerCase()||host;
+    const host=parsed.hostname.toLowerCase();
     const asciiLookalike=/xn--/.test(host);
     const mixedAlphabet=/[a-z].*[\u0400-\u04ff]|[\u0400-\u04ff].*[a-z]/i.test(host);
     const manyHyphens=(host.match(/-/g)||[]).length>=3;
@@ -247,7 +247,8 @@
     if(manyHyphens)warnings.push('This domain contains an unusual number of hyphens.');
     if(cleaned.isShortened)warnings.push('Short-link destination cannot be verified without contacting the shortener.');
     const identifierFindings=[...parameters.filter(p=>p.identifier).map(p=>({source:'parameter',name:p.name,...p.identifier})),...pathFindings(parsed)];
-    const transparency=transparencyCheck(parsed);
+    const transparency=transparencyCheck(parsed),embeddedDestination=transparency.find(item=>item.kind==='redirect')?.targetHost;
+    const destinationHost=embeddedDestination||normalize(cleaned.url)?.hostname.toLowerCase()||host;
     transparency.filter(item=>item.severity==='warning').forEach(item=>warnings.push(item.message));
     return{destination:cleaned.url,original:parsed.toString(),host,destinationHost,protocol:parsed.protocol,parameters,identifierFindings,transparency,fragment:parsed.hash||'',redirects:cleaned.redirectUnwrapped,warnings,cleaned};
   }

@@ -33,6 +33,7 @@ assert.equal(official.transparency.some(f=>f.kind==='lookalike'),false);
 
 const wrapped=LinkReadyCleaner.inspect('https://redirect.example/go?target=https%3A%2F%2Fexample.com%2Fsafe',standard);
 assert.equal(wrapped.transparency.some(f=>f.kind==='redirect'&&/redirect\.example/.test(f.message)&&/example\.com/.test(f.message)),true);
+assert.equal(wrapped.destinationHost,'example.com');
 
 const encoded=LinkReadyCleaner.inspect(`https://example.com/open?payload=${'A'.repeat(140)}`,standard);
 assert.equal(encoded.transparency.some(f=>f.kind==='encoded'),true);
